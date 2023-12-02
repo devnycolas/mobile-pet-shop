@@ -1,6 +1,6 @@
 # Pet Shop - Aplicação Mobile
 
-![PreviewImage](https://github.com/devnycolas/mobile-pet-shop/assets/143043571/34203795-e42c-470a-84ce-4043deeb1170)
+![PreviewAppMobile](https://github.com/devnycolas/projeto-pet-service/assets/143043571/f0fba1e8-062d-4135-938b-3dbd1478d84f)
 
 Projeto de Extensão da matéria de Programação Para Dispositivos Móveis em Android.
 
