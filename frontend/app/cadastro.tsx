@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Button,
   View,
   Text,
   StyleSheet,
-  Image,
   TextInput,
   TouchableOpacity,
   Alert
@@ -17,13 +15,24 @@ import { API_URL } from '../env';
 export default function CadastroScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState(''); // Novo estado para o campo username
+  const [username, setUsername] = useState('');
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false,
+  });
   const navigation = useRouter();
-
 
   const handleCadastro = () => {
     if (email.trim() === '' || password.trim() === '' || username.trim() === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+    } else if (!validatePassword(password)) {
+      Alert.alert(
+        'Erro',
+        'A senha deve ter entre 8 e 20 caracteres, pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial.'
+      );
     } else {
       fetch(API_URL + `/api/v1/cadastro-usuario/`, {
         method: 'POST',
@@ -33,7 +42,7 @@ export default function CadastroScreen() {
         body: JSON.stringify({
           email: email,
           password: password,
-          username: username, // Inclua o campo username no corpo da solicitação
+          username: username,
         }),
       })
         .then(response => response.json())
@@ -45,6 +54,25 @@ export default function CadastroScreen() {
           console.error('Erro ao cadastrar usuário:', error);
         });
     }
+  };
+
+  const validatePassword = (password: string) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,20}$/;
+    return passwordRegex.test(password);
+  };
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+
+    const requirements = {
+      length: value.length >= 8 && value.length <= 20,
+      uppercase: /[A-Z]/.test(value),
+      lowercase: /[a-z]/.test(value),
+      number: /\d/.test(value),
+      specialChar: /[!@#$%^&*()_+]/.test(value),
+    };
+
+    setPasswordRequirements(requirements);
   };
 
   return (
@@ -72,16 +100,34 @@ export default function CadastroScreen() {
 
         <Text style={styles.title}>Senha</Text>
         <TextInput
-          placeholder='Sua senha'
+          placeholder='Sua senha (mín. 8 caracteres, 1 maiúscula, 1 minúscula, 1 número, 1 especial)'
           style={styles.input}
           secureTextEntry={true}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
         />
 
         <TouchableOpacity style={styles.button} onPress={handleCadastro}>
           <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
+
+        <View style={styles.requirementsContainer}>
+          <Text style={styles.requirementText}>
+            Caracter Especial {passwordRequirements.specialChar ? '✅' : '❌'}
+          </Text>
+          <Text style={styles.requirementText}>
+            Maiúscula {passwordRequirements.uppercase ? '✅' : '❌'}
+          </Text>
+          <Text style={styles.requirementText}>
+            Minúscula {passwordRequirements.lowercase ? '✅' : '❌'}
+          </Text>
+          <Text style={styles.requirementText}>
+            Número {passwordRequirements.number ? '✅' : '❌'}
+          </Text>
+          <Text style={styles.requirementText}>
+            Comprimento entre 8 e 20 {passwordRequirements.length ? '✅' : '❌'}
+          </Text>
+        </View>
 
         <Link href="/" asChild>
           <TouchableOpacity style={styles.buttonRegister}>
@@ -112,7 +158,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     flex: 1,
     borderTopLeftRadius: 25,
-    borderTopRigthRadius: 25,
+    borderTopRightRadius: 25,
     paddingStart: '5%',
     paddingEnd: '5%'
   },
@@ -146,5 +192,13 @@ const styles = StyleSheet.create({
   },
   registerText: {
     color: '#a1a1a1'
-  }
-})
+  },
+  requirementsContainer: {
+    marginTop: 10,
+  },
+  requirementText: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 5, // Adiciona espaço entre as linhas
+  },
+});
